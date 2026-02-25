@@ -1,0 +1,68 @@
+/**
+ * Configuration options for TetherClient
+ */
+export interface TetherClientConfig {
+  /** The credential ID for the agent */
+  credentialId?: string;
+  /** Path to the private key file (DER or PEM format) */
+  privateKeyPath?: string;
+  /** Private key as a string (PEM format) */
+  privateKeyPem?: string;
+  /** Private key as a Buffer (DER format) */
+  privateKeyBuffer?: Buffer;
+  /** Base URL for the Tether API (defaults to https://api.tether.name) */
+  baseUrl?: string;
+}
+
+/**
+ * Response from the challenge request endpoint
+ */
+export interface ChallengeResponse {
+  code: string;
+}
+
+/**
+ * Request payload for challenge verification
+ */
+export interface VerificationRequest {
+  challenge: string;
+  proof: string;
+  credentialId: string;
+}
+
+/**
+ * Response from the challenge verification endpoint
+ */
+export interface VerificationResponse {
+  valid: boolean;
+  verifyUrl?: string;
+  agentName?: string;
+  email?: string;
+  registeredSince?: string;
+  error?: string;
+}
+
+/**
+ * Result of a tether verification attempt
+ */
+export interface VerificationResult {
+  /** Whether the verification was successful */
+  verified: boolean;
+  /** The agent's registered name */
+  agentName?: string;
+  /** Public verification URL */
+  verifyUrl?: string;
+  /** The agent's registered email */
+  email?: string;
+  /** ISO date string of when the agent was registered */
+  registeredSince?: string;
+  /** Error message if verification failed */
+  error?: string;
+  /** The challenge that was verified */
+  challenge?: string;
+}
+
+/**
+ * Supported private key formats
+ */
+export type KeyFormat = 'pem' | 'der';
