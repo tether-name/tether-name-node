@@ -4,7 +4,7 @@ import { loadPrivateKey, signChallenge } from './crypto.js';
 import type {
   TetherClientConfig,
   ChallengeResponse,
-  Credential,
+  Agent,
   IssueCredentialResponse,
   VerificationRequest,
   VerificationResponse,
@@ -221,9 +221,9 @@ export class TetherClient {
   }
 
   /**
-   * Create a new credential for an agent
+   * Create a new agent
    */
-  async createCredential(agentName: string, description: string = ''): Promise<Credential> {
+  async createAgent(agentName: string, description: string = ''): Promise<Agent> {
     try {
       const response = await fetch(`${this.baseUrl}/credentials/issue`, {
         method: 'POST',
@@ -237,7 +237,7 @@ export class TetherClient {
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error');
         throw new TetherAPIError(
-          `Create credential failed: ${response.status} ${response.statusText}`,
+          `Create agent failed: ${response.status} ${response.statusText}`,
           response.status,
           errorText
         );
@@ -250,7 +250,7 @@ export class TetherClient {
         throw error;
       }
       throw new TetherAPIError(
-        `Failed to create credential: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to create agent: ${error instanceof Error ? error.message : String(error)}`,
         undefined,
         undefined,
         error instanceof Error ? error : undefined
@@ -259,9 +259,9 @@ export class TetherClient {
   }
 
   /**
-   * List all credentials
+   * List all agents
    */
-  async listCredentials(): Promise<Credential[]> {
+  async listAgents(): Promise<Agent[]> {
     try {
       const response = await fetch(`${this.baseUrl}/credentials`, {
         method: 'GET',
@@ -273,20 +273,20 @@ export class TetherClient {
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error');
         throw new TetherAPIError(
-          `List credentials failed: ${response.status} ${response.statusText}`,
+          `List agents failed: ${response.status} ${response.statusText}`,
           response.status,
           errorText
         );
       }
 
-      const data = await response.json() as Credential[];
+      const data = await response.json() as Agent[];
       return data;
     } catch (error) {
       if (error instanceof TetherError) {
         throw error;
       }
       throw new TetherAPIError(
-        `Failed to list credentials: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to list agents: ${error instanceof Error ? error.message : String(error)}`,
         undefined,
         undefined,
         error instanceof Error ? error : undefined
@@ -295,11 +295,11 @@ export class TetherClient {
   }
 
   /**
-   * Delete a credential by ID
+   * Delete an agent by ID
    */
-  async deleteCredential(credentialId: string): Promise<boolean> {
+  async deleteAgent(agentId: string): Promise<boolean> {
     try {
-      const response = await fetch(`${this.baseUrl}/credentials/${credentialId}`, {
+      const response = await fetch(`${this.baseUrl}/credentials/${agentId}`, {
         method: 'DELETE',
         headers: {
           ...this._authHeaders()
@@ -309,7 +309,7 @@ export class TetherClient {
       if (!response.ok) {
         const errorText = await response.text().catch(() => 'Unknown error');
         throw new TetherAPIError(
-          `Delete credential failed: ${response.status} ${response.statusText}`,
+          `Delete agent failed: ${response.status} ${response.statusText}`,
           response.status,
           errorText
         );
@@ -321,7 +321,7 @@ export class TetherClient {
         throw error;
       }
       throw new TetherAPIError(
-        `Failed to delete credential: ${error instanceof Error ? error.message : String(error)}`,
+        `Failed to delete agent: ${error instanceof Error ? error.message : String(error)}`,
         undefined,
         undefined,
         error instanceof Error ? error : undefined

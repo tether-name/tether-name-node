@@ -66,9 +66,9 @@ interface VerificationResult {
  */
 type KeyFormat = 'pem' | 'der';
 /**
- * A credential associated with an agent
+ * An agent with its associated metadata
  */
-interface Credential {
+interface Agent {
     id: string;
     agentName: string;
     description: string;
@@ -125,17 +125,17 @@ declare class TetherClient {
      */
     verify(): Promise<VerificationResult>;
     /**
-     * Create a new credential for an agent
+     * Create a new agent
      */
-    createCredential(agentName: string, description?: string): Promise<Credential>;
+    createAgent(agentName: string, description?: string): Promise<Agent>;
     /**
-     * List all credentials
+     * List all agents
      */
-    listCredentials(): Promise<Credential[]>;
+    listAgents(): Promise<Agent[]>;
     /**
-     * Delete a credential by ID
+     * Delete an agent by ID
      */
-    deleteCredential(credentialId: string): Promise<boolean>;
+    deleteAgent(agentId: string): Promise<boolean>;
 }
 
 /**
@@ -178,4 +178,4 @@ declare function signChallenge(privateKey: KeyObject, challenge: string): string
  */
 declare function detectKeyFormat(keyPath: string): KeyFormat;
 
-export { type ChallengeResponse, type Credential, type IssueCredentialResponse, type KeyFormat, TetherAPIError, TetherClient, type TetherClientConfig, TetherError, TetherVerificationError, type VerificationRequest, type VerificationResponse, type VerificationResult, detectKeyFormat, loadPrivateKey, signChallenge };
+export { type Agent, type ChallengeResponse, type IssueCredentialResponse, type KeyFormat, TetherAPIError, TetherClient, type TetherClientConfig, TetherError, TetherVerificationError, type VerificationRequest, type VerificationResponse, type VerificationResult, detectKeyFormat, loadPrivateKey, signChallenge };

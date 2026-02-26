@@ -22,7 +22,7 @@ export { TetherClient } from './client.js';
 export type {
   TetherClientConfig,
   ChallengeResponse,
-  Credential,
+  Agent,
   IssueCredentialResponse,
   VerificationRequest,
   VerificationResponse,

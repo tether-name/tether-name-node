@@ -70,9 +70,9 @@ export interface VerificationResult {
 export type KeyFormat = 'pem' | 'der';
 
 /**
- * A credential associated with an agent
+ * An agent with its associated metadata
  */
-export interface Credential {
+export interface Agent {
   id: string;
   agentName: string;
   description: string;
