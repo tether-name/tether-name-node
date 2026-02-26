@@ -68,17 +68,51 @@ try {
 
 ```typescript
 interface TetherClientConfig {
-  // Credential ID (required)
+  // API key (for agent management — no private key needed)
+  apiKey?: string;                 // Or use TETHER_API_KEY env var
+
+  // Credential ID (required for verify/sign, optional with apiKey)
   credentialId?: string;           // Or use TETHER_CREDENTIAL_ID env var
-  
-  // Private key (choose one)
+
+  // Private key (required for verify/sign, choose one)
   privateKeyPath?: string;         // Path to DER or PEM file
   privateKeyPem?: string;          // PEM string directly
   privateKeyBuffer?: Buffer;       // DER buffer directly
-  
+
   // Optional
   baseUrl?: string;               // API base URL (defaults to https://api.tether.name)
 }
+```
+
+### Authentication Modes
+
+**API key only** — manage agents without a private key:
+
+```typescript
+const client = new TetherClient({
+  apiKey: 'tether_sk_...'
+});
+
+const agent = await client.createAgent('my-bot');
+```
+
+**API key + credential + private key** — full access (management and verification):
+
+```typescript
+const client = new TetherClient({
+  apiKey: 'tether_sk_...',
+  credentialId: 'your-credential-id',
+  privateKeyPath: '/path/to/key.der'
+});
+```
+
+**Credential + private key only** — verification without agent management (original behavior):
+
+```typescript
+const client = new TetherClient({
+  credentialId: 'your-credential-id',
+  privateKeyPath: '/path/to/key.der'
+});
 ```
 
 ### Key Format Support
@@ -106,11 +140,32 @@ const client3 = new TetherClient({
 });
 ```
 
+## Agent Management
+
+Create and manage agents programmatically with an API key:
+
+```typescript
+const client = new TetherClient({ apiKey: 'tether_sk_...' });
+
+// Create an agent
+const agent = await client.createAgent('my-bot', 'Does helpful things');
+console.log(agent.id);              // "abc123"
+console.log(agent.agentName);       // "my-bot"
+console.log(agent.registrationToken); // Use to register credentials
+
+// List all agents
+const agents = await client.listAgents();
+
+// Delete an agent
+await client.deleteAgent(agent.id);
+```
+
 ## Environment Variables
 
 Set these environment variables to avoid hardcoding credentials:
 
 ```bash
+export TETHER_API_KEY="tether_sk_..."                        # API key for agent management
 export TETHER_CREDENTIAL_ID="your-credential-id"
 export TETHER_PRIVATE_KEY_PATH="/path/to/your/private-key.der"
 ```
@@ -151,6 +206,18 @@ Signs a challenge using the configured private key.
 
 Submits signed proof to verify the challenge.
 
+#### `async createAgent(agentName: string, description?: string): Promise<Agent>`
+
+Creates a new agent. Requires API key authentication.
+
+#### `async listAgents(): Promise<Agent[]>`
+
+Lists all agents for the authenticated account. Requires API key authentication.
+
+#### `async deleteAgent(agentId: string): Promise<boolean>`
+
+Deletes an agent by ID. Requires API key authentication. Returns `true` on success.
+
 ### Types
 
 ```typescript
@@ -162,6 +229,17 @@ interface VerificationResult {
   registeredSince?: string;    // ISO date of registration
   error?: string;              // Error message if failed
   challenge?: string;          // The verified challenge
+}
+```
+
+```typescript
+interface Agent {
+  id: string;
+  agentName: string;
+  description: string;
+  createdAt: number;
+  registrationToken?: string;
+  lastVerifiedAt?: number;
 }
 ```
 
