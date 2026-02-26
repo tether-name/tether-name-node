@@ -1,6 +1,6 @@
 {
   "name": "tether-name",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Official Node.js SDK for tether.name - AI agent identity verification",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
@@ -29,15 +29,15 @@
     "crypto",
     "rsa"
   ],
-  "author": "Commit 451 <jawnnypoo@gmail.com>",
+  "author": "Commit 451",
   "license": "MIT",
   "homepage": "https://tether.name",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Commit451/tether-name-node.git"
+    "url": "https://github.com/tether-name/tether-name-node.git"
   },
   "bugs": {
-    "url": "https://github.com/Commit451/tether-name-node/issues"
+    "url": "https://github.com/tether-name/tether-name-node/issues"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -46,6 +46,6 @@
     "@types/node": "^20.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.0.0",
-    "vitest": "^1.0.0"
+    "vitest": "^4.0.18"
   }
 }
