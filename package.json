@@ -40,7 +40,7 @@
     "url": "https://github.com/tether-name/tether-name-node/issues"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
