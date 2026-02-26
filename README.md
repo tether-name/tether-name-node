@@ -16,7 +16,7 @@ Requires Node.js 18+ (uses native `fetch` and `crypto` modules).
 import { TetherClient } from 'tether-name';
 
 const client = new TetherClient({
-  credentialId: 'rgUOzbqar8z0Ag9RZH5I',
+  credentialId: 'your-credential-id',
   privateKeyPath: '/path/to/your/private-key.der'
 });
 
@@ -35,7 +35,7 @@ For more control over the verification process:
 import { TetherClient } from 'tether-name';
 
 const client = new TetherClient({
-  credentialId: 'rgUOzbqar8z0Ag9RZH5I',
+  credentialId: 'your-credential-id',
   privateKeyPem: `-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA...
 -----END RSA PRIVATE KEY-----`
@@ -205,6 +205,6 @@ MIT License - see [LICENSE](LICENSE) file for details.
 ## Links
 
 - 🌐 [Tether Website](https://tether.name)
-- 📘 [Documentation](https://tether.name/docs)
-- 🐛 [Issues](https://github.com/Commit451/tether-name-node/issues)
+- 📘 [Documentation](https://docs.tether.name)
+- 🐛 [Issues](https://github.com/tether-name/tether-name-node/issues)
 - 📦 [npm Package](https://www.npmjs.com/package/tether-name)
