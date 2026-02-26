@@ -14,6 +14,8 @@ interface TetherClientConfig {
     privateKeyBuffer?: Buffer;
     /** Base URL for the Tether API (defaults to https://api.tether.name) */
     baseUrl?: string;
+    /** API key for management operations (alternative to credential auth) */
+    apiKey?: string;
 }
 /**
  * Response from the challenge request endpoint
@@ -63,6 +65,27 @@ interface VerificationResult {
  * Supported private key formats
  */
 type KeyFormat = 'pem' | 'der';
+/**
+ * A credential associated with an agent
+ */
+interface Credential {
+    id: string;
+    agentName: string;
+    description: string;
+    createdAt: number;
+    registrationToken?: string;
+    lastVerifiedAt?: number;
+}
+/**
+ * Response from the issue credential endpoint
+ */
+interface IssueCredentialResponse {
+    id: string;
+    agentName: string;
+    description: string;
+    createdAt: number;
+    registrationToken: string;
+}
 
 /**
  * TetherClient - Official SDK for tether.name agent identity verification
@@ -71,7 +94,20 @@ declare class TetherClient {
     private readonly credentialId;
     private readonly privateKey;
     private readonly baseUrl;
+    private readonly apiKey?;
     constructor(config: TetherClientConfig);
+    /**
+     * Returns authorization headers when an API key is configured
+     */
+    private _authHeaders;
+    /**
+     * Ensures a private key is available, throwing if not
+     */
+    private _requirePrivateKey;
+    /**
+     * Ensures a credential ID is available, throwing if not
+     */
+    private _requireCredentialId;
     /**
      * Request a challenge from the Tether API
      */
@@ -88,6 +124,18 @@ declare class TetherClient {
      * Perform complete verification in one call
      */
     verify(): Promise<VerificationResult>;
+    /**
+     * Create a new credential for an agent
+     */
+    createCredential(agentName: string, description?: string): Promise<Credential>;
+    /**
+     * List all credentials
+     */
+    listCredentials(): Promise<Credential[]>;
+    /**
+     * Delete a credential by ID
+     */
+    deleteCredential(credentialId: string): Promise<boolean>;
 }
 
 /**
@@ -130,4 +178,4 @@ declare function signChallenge(privateKey: KeyObject, challenge: string): string
  */
 declare function detectKeyFormat(keyPath: string): KeyFormat;
 
-export { type ChallengeResponse, type KeyFormat, TetherAPIError, TetherClient, type TetherClientConfig, TetherError, TetherVerificationError, type VerificationRequest, type VerificationResponse, type VerificationResult, detectKeyFormat, loadPrivateKey, signChallenge };
+export { type ChallengeResponse, type Credential, type IssueCredentialResponse, type KeyFormat, TetherAPIError, TetherClient, type TetherClientConfig, TetherError, TetherVerificationError, type VerificationRequest, type VerificationResponse, type VerificationResult, detectKeyFormat, loadPrivateKey, signChallenge };

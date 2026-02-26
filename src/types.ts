@@ -12,6 +12,8 @@ export interface TetherClientConfig {
   privateKeyBuffer?: Buffer;
   /** Base URL for the Tether API (defaults to https://api.tether.name) */
   baseUrl?: string;
+  /** API key for management operations (alternative to credential auth) */
+  apiKey?: string;
 }
 
 /**
@@ -66,3 +68,26 @@ export interface VerificationResult {
  * Supported private key formats
  */
 export type KeyFormat = 'pem' | 'der';
+
+/**
+ * A credential associated with an agent
+ */
+export interface Credential {
+  id: string;
+  agentName: string;
+  description: string;
+  createdAt: number;
+  registrationToken?: string;
+  lastVerifiedAt?: number;
+}
+
+/**
+ * Response from the issue credential endpoint
+ */
+export interface IssueCredentialResponse {
+  id: string;
+  agentName: string;
+  description: string;
+  createdAt: number;
+  registrationToken: string;
+}

@@ -131,18 +131,57 @@ var TetherClient = class {
   credentialId;
   privateKey;
   baseUrl;
+  apiKey;
   constructor(config) {
-    this.credentialId = config.credentialId || process.env.TETHER_CREDENTIAL_ID || "";
-    if (!this.credentialId) {
-      throw new TetherError("Credential ID is required. Provide it in config or set TETHER_CREDENTIAL_ID environment variable.");
-    }
-    const keyPath = config.privateKeyPath || process.env.TETHER_PRIVATE_KEY_PATH;
-    this.privateKey = loadPrivateKey({
-      keyPath,
-      keyPem: config.privateKeyPem,
-      keyBuffer: config.privateKeyBuffer
-    });
     this.baseUrl = config.baseUrl || "https://api.tether.name";
+    this.apiKey = config.apiKey || process.env.TETHER_API_KEY;
+    this.credentialId = config.credentialId || process.env.TETHER_CREDENTIAL_ID || "";
+    const keyPath = config.privateKeyPath || process.env.TETHER_PRIVATE_KEY_PATH;
+    const hasKeyMaterial = keyPath || config.privateKeyPem || config.privateKeyBuffer;
+    if (hasKeyMaterial) {
+      this.privateKey = loadPrivateKey({
+        keyPath,
+        keyPem: config.privateKeyPem,
+        keyBuffer: config.privateKeyBuffer
+      });
+    } else {
+      this.privateKey = null;
+    }
+    if (!this.apiKey && !this.privateKey) {
+    }
+    if (!this.apiKey && !this.credentialId) {
+    }
+  }
+  /**
+   * Returns authorization headers when an API key is configured
+   */
+  _authHeaders() {
+    if (this.apiKey) {
+      return { "Authorization": `Bearer ${this.apiKey}` };
+    }
+    return {};
+  }
+  /**
+   * Ensures a private key is available, throwing if not
+   */
+  _requirePrivateKey() {
+    if (!this.privateKey) {
+      throw new TetherError(
+        "Private key is required for this operation. Provide privateKeyPath, privateKeyPem, or privateKeyBuffer in config, or set TETHER_PRIVATE_KEY_PATH environment variable."
+      );
+    }
+    return this.privateKey;
+  }
+  /**
+   * Ensures a credential ID is available, throwing if not
+   */
+  _requireCredentialId() {
+    if (!this.credentialId) {
+      throw new TetherError(
+        "Credential ID is required for this operation. Provide it in config or set TETHER_CREDENTIAL_ID environment variable."
+      );
+    }
+    return this.credentialId;
   }
   /**
    * Request a challenge from the Tether API
@@ -184,17 +223,19 @@ var TetherClient = class {
    * Sign a challenge string
    */
   sign(challenge) {
-    return signChallenge(this.privateKey, challenge);
+    const key = this._requirePrivateKey();
+    return signChallenge(key, challenge);
   }
   /**
    * Submit proof for a challenge
    */
   async submitProof(challenge, proof) {
+    const credentialId = this._requireCredentialId();
     try {
       const payload = {
         challenge,
         proof,
-        credentialId: this.credentialId
+        credentialId
       };
       const response = await fetch(`${this.baseUrl}/challenge/verify`, {
         method: "POST",
@@ -253,6 +294,106 @@ var TetherClient = class {
       }
       throw new TetherVerificationError(
         `Verification failed: ${error instanceof Error ? error.message : String(error)}`,
+        error instanceof Error ? error : void 0
+      );
+    }
+  }
+  /**
+   * Create a new credential for an agent
+   */
+  async createCredential(agentName, description = "") {
+    try {
+      const response = await fetch(`${this.baseUrl}/credentials/issue`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...this._authHeaders()
+        },
+        body: JSON.stringify({ agentName, description })
+      });
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new TetherAPIError(
+          `Create credential failed: ${response.status} ${response.statusText}`,
+          response.status,
+          errorText
+        );
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (error instanceof TetherError) {
+        throw error;
+      }
+      throw new TetherAPIError(
+        `Failed to create credential: ${error instanceof Error ? error.message : String(error)}`,
+        void 0,
+        void 0,
+        error instanceof Error ? error : void 0
+      );
+    }
+  }
+  /**
+   * List all credentials
+   */
+  async listCredentials() {
+    try {
+      const response = await fetch(`${this.baseUrl}/credentials`, {
+        method: "GET",
+        headers: {
+          ...this._authHeaders()
+        }
+      });
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new TetherAPIError(
+          `List credentials failed: ${response.status} ${response.statusText}`,
+          response.status,
+          errorText
+        );
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (error instanceof TetherError) {
+        throw error;
+      }
+      throw new TetherAPIError(
+        `Failed to list credentials: ${error instanceof Error ? error.message : String(error)}`,
+        void 0,
+        void 0,
+        error instanceof Error ? error : void 0
+      );
+    }
+  }
+  /**
+   * Delete a credential by ID
+   */
+  async deleteCredential(credentialId) {
+    try {
+      const response = await fetch(`${this.baseUrl}/credentials/${credentialId}`, {
+        method: "DELETE",
+        headers: {
+          ...this._authHeaders()
+        }
+      });
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new TetherAPIError(
+          `Delete credential failed: ${response.status} ${response.statusText}`,
+          response.status,
+          errorText
+        );
+      }
+      return true;
+    } catch (error) {
+      if (error instanceof TetherError) {
+        throw error;
+      }
+      throw new TetherAPIError(
+        `Failed to delete credential: ${error instanceof Error ? error.message : String(error)}`,
+        void 0,
+        void 0,
         error instanceof Error ? error : void 0
       );
     }

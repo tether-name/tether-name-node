@@ -22,6 +22,8 @@ export { TetherClient } from './client.js';
 export type {
   TetherClientConfig,
   ChallengeResponse,
+  Credential,
+  IssueCredentialResponse,
   VerificationRequest,
   VerificationResponse,
   VerificationResult,
