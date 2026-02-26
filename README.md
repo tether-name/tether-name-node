@@ -90,7 +90,7 @@ interface TetherClientConfig {
 
 ```typescript
 const client = new TetherClient({
-  apiKey: 'tether_sk_...'
+  apiKey: 'sk-tether-name-...'
 });
 
 const agent = await client.createAgent('my-bot');
@@ -100,7 +100,7 @@ const agent = await client.createAgent('my-bot');
 
 ```typescript
 const client = new TetherClient({
-  apiKey: 'tether_sk_...',
+  apiKey: 'sk-tether-name-...',
   credentialId: 'your-credential-id',
   privateKeyPath: '/path/to/key.der'
 });
@@ -145,7 +145,7 @@ const client3 = new TetherClient({
 Create and manage agents programmatically with an API key:
 
 ```typescript
-const client = new TetherClient({ apiKey: 'tether_sk_...' });
+const client = new TetherClient({ apiKey: 'sk-tether-name-...' });
 
 // Create an agent
 const agent = await client.createAgent('my-bot', 'Does helpful things');
@@ -165,7 +165,7 @@ await client.deleteAgent(agent.id);
 Set these environment variables to avoid hardcoding credentials:
 
 ```bash
-export TETHER_API_KEY="tether_sk_..."                        # API key for agent management
+export TETHER_API_KEY="sk-tether-name-..."                        # API key for agent management
 export TETHER_CREDENTIAL_ID="your-credential-id"
 export TETHER_PRIVATE_KEY_PATH="/path/to/your/private-key.der"
 ```
