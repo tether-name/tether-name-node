@@ -1,6 +1,6 @@
 {
   "name": "tether-name",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Official Node.js SDK for tether.name - AI agent identity verification",
   "main": "./dist/index.js",
   "module": "./dist/index.mjs",
