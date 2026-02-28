@@ -182,12 +182,16 @@ export class TetherClient {
       const data = await response.json() as VerificationResponse;
 
       // Convert API response to our result format
+      const registeredSince = typeof data.registeredSince === 'number'
+        ? new Date(data.registeredSince).toISOString()
+        : data.registeredSince;
+
       return {
         verified: data.valid,
         agentName: data.agentName,
         verifyUrl: data.verifyUrl,
         email: data.email,
-        registeredSince: data.registeredSince,
+        registeredSince,
         error: data.error,
         challenge
       };

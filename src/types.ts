@@ -38,7 +38,8 @@ export interface VerificationResponse {
   verifyUrl?: string;
   agentName?: string;
   email?: string;
-  registeredSince?: string;
+  /** Raw API value (epoch ms from service; older services may return ISO strings) */
+  registeredSince?: number | string;
   error?: string;
 }
 
