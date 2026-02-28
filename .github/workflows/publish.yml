@@ -32,10 +32,10 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Publish to npm
+        run: npm publish --provenance --access public
+
       - name: Create GitHub Release
         run: gh release create "${{ github.ref_name }}" --generate-notes
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Publish to npm
-        run: npm publish --provenance --access public
