@@ -10,8 +10,6 @@ export interface TetherClientConfig {
   privateKeyPem?: string;
   /** Private key as a Buffer (DER format) */
   privateKeyBuffer?: Buffer;
-  /** Base URL for the Tether API (defaults to https://api.tether.name) */
-  baseUrl?: string;
   /** API key for management operations (alternative to credential auth) */
   apiKey?: string;
 }

@@ -80,7 +80,6 @@ interface TetherClientConfig {
   privateKeyBuffer?: Buffer;       // DER buffer directly
 
   // Optional
-  baseUrl?: string;               // API base URL (defaults to https://api.tether.name)
 }
 ```
 

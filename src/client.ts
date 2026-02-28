@@ -22,7 +22,7 @@ export class TetherClient {
 
   constructor(config: TetherClientConfig) {
     // Set base URL
-    this.baseUrl = config.baseUrl || 'https://api.tether.name';
+    this.baseUrl = 'https://api.tether.name';
 
     // Get API key from config or environment
     this.apiKey = config.apiKey || process.env.TETHER_API_KEY;
