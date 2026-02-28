@@ -8,7 +8,7 @@ Official Node.js SDK for [tether.name](https://tether.name) — cryptographic id
 npm install tether-name
 ```
 
-Requires Node.js 18+ (uses native `fetch` and `crypto` modules).
+Requires Node.js 20+ (uses native `fetch` and `crypto` modules).
 
 ## Quick Start
 
@@ -264,7 +264,7 @@ openssl rsa -in private-key.pem -outform DER -out private-key.der
 
 ## Requirements
 
-- Node.js 18+ (uses native `fetch`)
+- Node.js 20+ (uses native `fetch`)
 - RSA-2048 private key
 - Zero runtime dependencies (uses only Node.js built-ins)
 
