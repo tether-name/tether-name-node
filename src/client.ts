@@ -78,6 +78,17 @@ export class TetherClient {
   }
 
   /**
+   * Ensures an API key is available, throwing if not
+   */
+  private _requireApiKey(): void {
+    if (!this.apiKey) {
+      throw new TetherError(
+        'API key is required for agent management operations. Provide apiKey in config or set TETHER_API_KEY environment variable.'
+      );
+    }
+  }
+
+  /**
    * Ensures a credential ID is available, throwing if not
    */
   private _requireCredentialId(): string {
@@ -224,6 +235,7 @@ export class TetherClient {
    * Create a new agent
    */
   async createAgent(agentName: string, description: string = ''): Promise<Agent> {
+    this._requireApiKey();
     try {
       const response = await fetch(`${this.baseUrl}/credentials/issue`, {
         method: 'POST',
@@ -262,6 +274,7 @@ export class TetherClient {
    * List all agents
    */
   async listAgents(): Promise<Agent[]> {
+    this._requireApiKey();
     try {
       const response = await fetch(`${this.baseUrl}/credentials`, {
         method: 'GET',
@@ -298,6 +311,7 @@ export class TetherClient {
    * Delete an agent by ID
    */
   async deleteAgent(agentId: string): Promise<boolean> {
+    this._requireApiKey();
     try {
       const response = await fetch(`${this.baseUrl}/credentials/${agentId}`, {
         method: 'DELETE',

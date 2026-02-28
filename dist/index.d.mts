@@ -105,6 +105,10 @@ declare class TetherClient {
      */
     private _requirePrivateKey;
     /**
+     * Ensures an API key is available, throwing if not
+     */
+    private _requireApiKey;
+    /**
      * Ensures a credential ID is available, throwing if not
      */
     private _requireCredentialId;

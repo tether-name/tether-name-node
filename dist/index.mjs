@@ -27,6 +27,19 @@ var TetherAPIError = class extends TetherError {
 // src/crypto.ts
 import { createSign, createPrivateKey } from "crypto";
 import { readFileSync } from "fs";
+function importDerKey(derData) {
+  try {
+    return createPrivateKey({ key: derData, format: "der", type: "pkcs8" });
+  } catch {
+  }
+  try {
+    return createPrivateKey({ key: derData, format: "der", type: "pkcs1" });
+  } catch {
+  }
+  throw new TetherError(
+    "Failed to load DER private key: data is not valid PKCS#8 or PKCS#1. Ensure the file is an RSA private key in DER format."
+  );
+}
 function loadPrivateKey(options) {
   const { keyPath, keyPem, keyBuffer } = options;
   try {
@@ -34,22 +47,14 @@ function loadPrivateKey(options) {
       return createPrivateKey(keyPem);
     }
     if (keyBuffer) {
-      return createPrivateKey({
-        key: keyBuffer,
-        format: "der",
-        type: "pkcs1"
-      });
+      return importDerKey(keyBuffer);
     }
     if (keyPath) {
       const keyData = readFileSync(keyPath);
       if (keyPath.endsWith(".pem") || keyData.toString().includes("-----BEGIN")) {
         return createPrivateKey(keyData);
       } else {
-        return createPrivateKey({
-          key: keyData,
-          format: "der",
-          type: "pkcs1"
-        });
+        return importDerKey(keyData);
       }
     }
     throw new TetherError("No private key provided");
@@ -139,6 +144,16 @@ var TetherClient = class {
       );
     }
     return this.privateKey;
+  }
+  /**
+   * Ensures an API key is available, throwing if not
+   */
+  _requireApiKey() {
+    if (!this.apiKey) {
+      throw new TetherError(
+        "API key is required for agent management operations. Provide apiKey in config or set TETHER_API_KEY environment variable."
+      );
+    }
   }
   /**
    * Ensures a credential ID is available, throwing if not
@@ -270,6 +285,7 @@ var TetherClient = class {
    * Create a new agent
    */
   async createAgent(agentName, description = "") {
+    this._requireApiKey();
     try {
       const response = await fetch(`${this.baseUrl}/credentials/issue`, {
         method: "POST",
@@ -305,6 +321,7 @@ var TetherClient = class {
    * List all agents
    */
   async listAgents() {
+    this._requireApiKey();
     try {
       const response = await fetch(`${this.baseUrl}/credentials`, {
         method: "GET",
@@ -338,6 +355,7 @@ var TetherClient = class {
    * Delete an agent by ID
    */
   async deleteAgent(agentId) {
+    this._requireApiKey();
     try {
       const response = await fetch(`${this.baseUrl}/credentials/${agentId}`, {
         method: "DELETE",
