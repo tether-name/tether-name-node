@@ -84,14 +84,30 @@ describe('Crypto Module', () => {
       expect(key.asymmetricKeyType).toBe('rsa');
     });
 
-    it('should load DER key from buffer', () => {
+    it('should load PKCS#1 DER key from buffer', () => {
       const privateKey = createPrivateKey(testKeyPair.privateKey);
       const derBuffer = privateKey.export({ format: 'der', type: 'pkcs1' });
-      
+
       const key = loadPrivateKey({ keyBuffer: derBuffer });
-      
+
       expect(key).toBeDefined();
       expect(key.asymmetricKeyType).toBe('rsa');
+    });
+
+    it('should load PKCS#8 DER key from buffer', () => {
+      const privateKey = createPrivateKey(testKeyPair.privateKey);
+      const derBuffer = privateKey.export({ format: 'der', type: 'pkcs8' });
+
+      const key = loadPrivateKey({ keyBuffer: derBuffer });
+
+      expect(key).toBeDefined();
+      expect(key.asymmetricKeyType).toBe('rsa');
+    });
+
+    it('should throw descriptive error for invalid DER buffer', () => {
+      const badBuffer = Buffer.from('not-a-real-der-key');
+
+      expect(() => loadPrivateKey({ keyBuffer: badBuffer })).toThrow('not valid PKCS#8 or PKCS#1');
     });
 
     it('should throw error when no key is provided', () => {

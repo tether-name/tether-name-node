@@ -4,6 +4,26 @@ import { TetherError } from './errors.js';
 import type { KeyFormat } from './types.js';
 
 /**
+ * Imports a DER-encoded private key, trying PKCS#8 first then PKCS#1.
+ */
+function importDerKey(derData: Buffer): KeyObject {
+  try {
+    return createPrivateKey({ key: derData, format: 'der', type: 'pkcs8' });
+  } catch {
+    // PKCS#8 failed — try PKCS#1
+  }
+  try {
+    return createPrivateKey({ key: derData, format: 'der', type: 'pkcs1' });
+  } catch {
+    // PKCS#1 also failed
+  }
+  throw new TetherError(
+    'Failed to load DER private key: data is not valid PKCS#8 or PKCS#1. ' +
+    'Ensure the file is an RSA private key in DER format.'
+  );
+}
+
+/**
  * Loads a private key from various sources
  */
 export function loadPrivateKey(options: {
@@ -18,34 +38,26 @@ export function loadPrivateKey(options: {
       // PEM string provided directly
       return createPrivateKey(keyPem);
     }
-    
+
     if (keyBuffer) {
       // DER buffer provided directly
-      return createPrivateKey({
-        key: keyBuffer,
-        format: 'der',
-        type: 'pkcs1'
-      });
+      return importDerKey(keyBuffer);
     }
-    
+
     if (keyPath) {
       // Read from file - detect format by extension or content
       const keyData = readFileSync(keyPath);
-      
+
       // Try to detect format
       if (keyPath.endsWith('.pem') || keyData.toString().includes('-----BEGIN')) {
         // PEM format
         return createPrivateKey(keyData);
       } else {
         // Assume DER format
-        return createPrivateKey({
-          key: keyData,
-          format: 'der',
-          type: 'pkcs1'
-        });
+        return importDerKey(keyData);
       }
     }
-    
+
     throw new TetherError('No private key provided');
   } catch (error) {
     if (error instanceof TetherError) {
