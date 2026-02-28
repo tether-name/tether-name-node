@@ -233,12 +233,12 @@ interface VerificationResult {
 
 ```typescript
 interface Agent {
-  id: string;
-  agentName: string;
-  description: string;
-  createdAt: number;
-  registrationToken?: string;
-  lastVerifiedAt?: number;
+  id: string;                  // Unique agent ID
+  agentName: string;           // Agent display name
+  description: string;         // Agent description
+  createdAt: number;           // Creation time (epoch ms)
+  registrationToken?: string;  // Token for key registration (returned on create)
+  lastVerifiedAt?: number;     // Last verification time (epoch ms)
 }
 ```
 
