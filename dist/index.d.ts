@@ -12,8 +12,6 @@ interface TetherClientConfig {
     privateKeyPem?: string;
     /** Private key as a Buffer (DER format) */
     privateKeyBuffer?: Buffer;
-    /** Base URL for the Tether API (defaults to https://api.tether.name) */
-    baseUrl?: string;
     /** API key for management operations (alternative to credential auth) */
     apiKey?: string;
 }
@@ -39,7 +37,8 @@ interface VerificationResponse {
     verifyUrl?: string;
     agentName?: string;
     email?: string;
-    registeredSince?: string;
+    /** Raw API value (epoch ms from service; older services may return ISO strings) */
+    registeredSince?: number | string;
     error?: string;
 }
 /**

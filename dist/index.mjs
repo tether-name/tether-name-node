@@ -106,7 +106,7 @@ var TetherClient = class {
   baseUrl;
   apiKey;
   constructor(config) {
-    this.baseUrl = config.baseUrl || "https://api.tether.name";
+    this.baseUrl = "https://api.tether.name";
     this.apiKey = config.apiKey || process.env.TETHER_API_KEY;
     this.credentialId = config.credentialId || process.env.TETHER_CREDENTIAL_ID || "";
     const keyPath = config.privateKeyPath || process.env.TETHER_PRIVATE_KEY_PATH;
@@ -236,12 +236,13 @@ var TetherClient = class {
         );
       }
       const data = await response.json();
+      const registeredSince = typeof data.registeredSince === "number" ? new Date(data.registeredSince).toISOString() : data.registeredSince;
       return {
         verified: data.valid,
         agentName: data.agentName,
         verifyUrl: data.verifyUrl,
         email: data.email,
-        registeredSince: data.registeredSince,
+        registeredSince,
         error: data.error,
         challenge
       };
