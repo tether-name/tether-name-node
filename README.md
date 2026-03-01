@@ -71,7 +71,7 @@ interface TetherClientConfig {
   // API key (for agent management — no private key needed)
   apiKey?: string;                 // Or use TETHER_API_KEY env var
 
-  // Credential ID (required for verify/sign, optional with apiKey)
+  // Agent ID (required for verify/sign, optional with apiKey)
   agentId?: string;           // Or use TETHER_AGENT_ID env var
 
   // Private key (required for verify/sign, choose one)
@@ -105,7 +105,7 @@ const client = new TetherClient({
 });
 ```
 
-**Credential + private key only** — verification without agent management (original behavior):
+**Agent + private key only** — verification without agent management (original behavior):
 
 ```typescript
 const client = new TetherClient({
@@ -165,7 +165,7 @@ Set these environment variables to avoid hardcoding secrets:
 
 ```bash
 export TETHER_API_KEY="sk-tether-name-..."                        # API key for agent management
-export TETHER_AGENT_ID="your-credential-id"
+export TETHER_AGENT_ID="your-agent-id"
 export TETHER_PRIVATE_KEY_PATH="/path/to/your/private-key.pem"
 ```
 
@@ -248,7 +248,7 @@ interface Agent {
 - `TetherVerificationError` - Verification failed
 - `TetherAPIError` - API request failed
 
-## Getting Your Credentials
+## Getting Your Agent Identity
 
 1. Visit [tether.name](https://tether.name)
 2. Register your agent and get an agent ID

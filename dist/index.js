@@ -133,14 +133,14 @@ function detectKeyFormat(keyPath) {
 
 // src/client.ts
 var TetherClient = class {
-  credentialId;
+  agentId;
   privateKey;
   baseUrl;
   apiKey;
   constructor(config) {
     this.baseUrl = "https://api.tether.name";
     this.apiKey = config.apiKey || process.env.TETHER_API_KEY;
-    this.credentialId = config.credentialId || process.env.TETHER_CREDENTIAL_ID || "";
+    this.agentId = config.agentId || process.env.TETHER_AGENT_ID || "";
     const keyPath = config.privateKeyPath || process.env.TETHER_PRIVATE_KEY_PATH;
     const hasKeyMaterial = keyPath || config.privateKeyPem || config.privateKeyBuffer;
     if (hasKeyMaterial) {
@@ -154,7 +154,7 @@ var TetherClient = class {
     }
     if (!this.apiKey && !this.privateKey) {
     }
-    if (!this.apiKey && !this.credentialId) {
+    if (!this.apiKey && !this.agentId) {
     }
   }
   /**
@@ -188,15 +188,15 @@ var TetherClient = class {
     }
   }
   /**
-   * Ensures a credential ID is available, throwing if not
+   * Ensures an agent ID is available, throwing if not
    */
-  _requireCredentialId() {
-    if (!this.credentialId) {
+  _requireAgentId() {
+    if (!this.agentId) {
       throw new TetherError(
-        "Credential ID is required for this operation. Provide it in config or set TETHER_CREDENTIAL_ID environment variable."
+        "Agent ID is required for this operation. Provide it in config or set TETHER_AGENT_ID environment variable."
       );
     }
-    return this.credentialId;
+    return this.agentId;
   }
   /**
    * Request a challenge from the Tether API
@@ -245,12 +245,12 @@ var TetherClient = class {
    * Submit proof for a challenge
    */
   async submitProof(challenge, proof) {
-    const credentialId = this._requireCredentialId();
+    const agentId = this._requireAgentId();
     try {
       const payload = {
         challenge,
         proof,
-        credentialId
+        agentId
       };
       const response = await fetch(`${this.baseUrl}/challenge/verify`, {
         method: "POST",
@@ -320,7 +320,7 @@ var TetherClient = class {
   async createAgent(agentName, description = "") {
     this._requireApiKey();
     try {
-      const response = await fetch(`${this.baseUrl}/credentials/issue`, {
+      const response = await fetch(`${this.baseUrl}/agents/issue`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -356,7 +356,7 @@ var TetherClient = class {
   async listAgents() {
     this._requireApiKey();
     try {
-      const response = await fetch(`${this.baseUrl}/credentials`, {
+      const response = await fetch(`${this.baseUrl}/agents`, {
         method: "GET",
         headers: {
           ...this._authHeaders()
@@ -390,7 +390,7 @@ var TetherClient = class {
   async deleteAgent(agentId) {
     this._requireApiKey();
     try {
-      const response = await fetch(`${this.baseUrl}/credentials/${agentId}`, {
+      const response = await fetch(`${this.baseUrl}/agents/${agentId}`, {
         method: "DELETE",
         headers: {
           ...this._authHeaders()

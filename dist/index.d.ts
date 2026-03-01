@@ -4,15 +4,15 @@ import { KeyObject } from 'crypto';
  * Configuration options for TetherClient
  */
 interface TetherClientConfig {
-    /** The credential ID for the agent */
-    credentialId?: string;
+    /** The agent ID */
+    agentId?: string;
     /** Path to the private key file (DER or PEM format) */
     privateKeyPath?: string;
     /** Private key as a string (PEM format) */
     privateKeyPem?: string;
     /** Private key as a Buffer (DER format) */
     privateKeyBuffer?: Buffer;
-    /** API key for management operations (alternative to credential auth) */
+    /** API key for management operations (alternative to agent auth) */
     apiKey?: string;
 }
 /**
@@ -27,7 +27,7 @@ interface ChallengeResponse {
 interface VerificationRequest {
     challenge: string;
     proof: string;
-    credentialId: string;
+    agentId: string;
 }
 /**
  * Response from the challenge verification endpoint
@@ -76,9 +76,9 @@ interface Agent {
     lastVerifiedAt?: number;
 }
 /**
- * Response from the issue credential endpoint
+ * Response from the issue agent endpoint
  */
-interface IssueCredentialResponse {
+interface IssueAgentResponse {
     id: string;
     agentName: string;
     description: string;
@@ -90,7 +90,7 @@ interface IssueCredentialResponse {
  * TetherClient - Official SDK for tether.name agent identity verification
  */
 declare class TetherClient {
-    private readonly credentialId;
+    private readonly agentId;
     private readonly privateKey;
     private readonly baseUrl;
     private readonly apiKey?;
@@ -108,9 +108,9 @@ declare class TetherClient {
      */
     private _requireApiKey;
     /**
-     * Ensures a credential ID is available, throwing if not
+     * Ensures an agent ID is available, throwing if not
      */
-    private _requireCredentialId;
+    private _requireAgentId;
     /**
      * Request a challenge from the Tether API
      */
@@ -181,4 +181,4 @@ declare function signChallenge(privateKey: KeyObject, challenge: string): string
  */
 declare function detectKeyFormat(keyPath: string): KeyFormat;
 
-export { type Agent, type ChallengeResponse, type IssueCredentialResponse, type KeyFormat, TetherAPIError, TetherClient, type TetherClientConfig, TetherError, TetherVerificationError, type VerificationRequest, type VerificationResponse, type VerificationResult, detectKeyFormat, loadPrivateKey, signChallenge };
+export { type Agent, type ChallengeResponse, type IssueAgentResponse, type KeyFormat, TetherAPIError, TetherClient, type TetherClientConfig, TetherError, TetherVerificationError, type VerificationRequest, type VerificationResponse, type VerificationResult, detectKeyFormat, loadPrivateKey, signChallenge };
