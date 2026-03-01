@@ -7,7 +7,7 @@
  * 
  * const client = new TetherClient({
  *   credentialId: 'your-credential-id',
- *   privateKeyPath: '/path/to/key.der'
+ *   privateKeyPath: '/path/to/key.pem'
  * });
  * 
  * const result = await client.verify();

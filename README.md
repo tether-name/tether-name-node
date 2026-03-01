@@ -17,7 +17,7 @@ import { TetherClient } from 'tether-name';
 
 const client = new TetherClient({
   credentialId: 'your-credential-id',
-  privateKeyPath: '/path/to/your/private-key.der'
+  privateKeyPath: '/path/to/your/private-key.pem'
 });
 
 // One-call verification
@@ -101,7 +101,7 @@ const agent = await client.createAgent('my-bot');
 const client = new TetherClient({
   apiKey: 'sk-tether-name-...',
   credentialId: 'your-credential-id',
-  privateKeyPath: '/path/to/key.der'
+  privateKeyPath: '/path/to/key.pem'
 });
 ```
 
@@ -110,19 +110,19 @@ const client = new TetherClient({
 ```typescript
 const client = new TetherClient({
   credentialId: 'your-credential-id',
-  privateKeyPath: '/path/to/key.der'
+  privateKeyPath: '/path/to/key.pem'
 });
 ```
 
 ### Key Format Support
 
-The SDK supports both DER and PEM private key formats:
+The SDK supports both PEM and DER private key formats:
 
 ```typescript
 // From file path (auto-detects format)
 const client1 = new TetherClient({
   credentialId: 'your-id',
-  privateKeyPath: '/path/to/key.der'    // or .pem
+  privateKeyPath: '/path/to/key.pem'    // or .der
 });
 
 // From PEM string
@@ -166,7 +166,7 @@ Set these environment variables to avoid hardcoding credentials:
 ```bash
 export TETHER_API_KEY="sk-tether-name-..."                        # API key for agent management
 export TETHER_CREDENTIAL_ID="your-credential-id"
-export TETHER_PRIVATE_KEY_PATH="/path/to/your/private-key.der"
+export TETHER_PRIVATE_KEY_PATH="/path/to/your/private-key.pem"
 ```
 
 Then initialize without parameters:
@@ -255,11 +255,8 @@ interface Agent {
 3. Generate an RSA-2048 private key:
 
 ```bash
-# Generate private key
-openssl genrsa -out private-key.pem 2048
-
-# Convert to DER format (optional)
-openssl rsa -in private-key.pem -outform DER -out private-key.der
+# Generate private key (PEM format)
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:2048 -out private-key.pem
 ```
 
 ## Requirements
