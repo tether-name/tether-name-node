@@ -6,7 +6,7 @@
  * import { TetherClient } from 'tether-name';
  * 
  * const client = new TetherClient({
- *   credentialId: 'your-credential-id',
+ *   agentId: 'your-agent-id',
  *   privateKeyPath: '/path/to/key.pem'
  * });
  * 
@@ -23,7 +23,7 @@ export type {
   TetherClientConfig,
   ChallengeResponse,
   Agent,
-  IssueCredentialResponse,
+  IssueAgentResponse,
   VerificationRequest,
   VerificationResponse,
   VerificationResult,

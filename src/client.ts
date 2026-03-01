@@ -5,7 +5,7 @@ import type {
   TetherClientConfig,
   ChallengeResponse,
   Agent,
-  IssueCredentialResponse,
+  IssueAgentResponse,
   VerificationRequest,
   VerificationResponse,
   VerificationResult
@@ -15,7 +15,7 @@ import type {
  * TetherClient - Official SDK for tether.name agent identity verification
  */
 export class TetherClient {
-  private readonly credentialId: string;
+  private readonly agentId: string;
   private readonly privateKey: KeyObject | null;
   private readonly baseUrl: string;
   private readonly apiKey?: string;
@@ -27,8 +27,8 @@ export class TetherClient {
     // Get API key from config or environment
     this.apiKey = config.apiKey || process.env.TETHER_API_KEY;
 
-    // Get credential ID from config or environment
-    this.credentialId = config.credentialId || process.env.TETHER_CREDENTIAL_ID || '';
+    // Get agent ID from config or environment
+    this.agentId = config.agentId || process.env.TETHER_AGENT_ID || '';
 
     // Load private key if key material is provided
     const keyPath = config.privateKeyPath || process.env.TETHER_PRIVATE_KEY_PATH;
@@ -44,13 +44,13 @@ export class TetherClient {
       this.privateKey = null;
     }
 
-    // If no API key and no private key, credential ID and key are still needed for verify/sign
+    // If no API key and no private key, agent ID and key are still needed for verify/sign
     // but we defer the error to when those methods are called
     if (!this.apiKey && !this.privateKey) {
       // Allow construction — errors thrown at method call time
     }
 
-    if (!this.apiKey && !this.credentialId) {
+    if (!this.apiKey && !this.agentId) {
       // Allow construction — errors thrown at method call time
     }
   }
@@ -89,15 +89,15 @@ export class TetherClient {
   }
 
   /**
-   * Ensures a credential ID is available, throwing if not
+   * Ensures an agent ID is available, throwing if not
    */
-  private _requireCredentialId(): string {
-    if (!this.credentialId) {
+  private _requireAgentId(): string {
+    if (!this.agentId) {
       throw new TetherError(
-        'Credential ID is required for this operation. Provide it in config or set TETHER_CREDENTIAL_ID environment variable.'
+        'Agent ID is required for this operation. Provide it in config or set TETHER_AGENT_ID environment variable.'
       );
     }
-    return this.credentialId;
+    return this.agentId;
   }
 
   /**
@@ -153,13 +153,13 @@ export class TetherClient {
    * Submit proof for a challenge
    */
   async submitProof(challenge: string, proof: string): Promise<VerificationResult> {
-    const credentialId = this._requireCredentialId();
+    const agentId = this._requireAgentId();
 
     try {
       const payload: VerificationRequest = {
         challenge,
         proof,
-        credentialId
+        agentId
       };
 
       const response = await fetch(`${this.baseUrl}/challenge/verify`, {
@@ -241,7 +241,7 @@ export class TetherClient {
   async createAgent(agentName: string, description: string = ''): Promise<Agent> {
     this._requireApiKey();
     try {
-      const response = await fetch(`${this.baseUrl}/credentials/issue`, {
+      const response = await fetch(`${this.baseUrl}/agents/issue`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -259,7 +259,7 @@ export class TetherClient {
         );
       }
 
-      const data = await response.json() as IssueCredentialResponse;
+      const data = await response.json() as IssueAgentResponse;
       return data;
     } catch (error) {
       if (error instanceof TetherError) {
@@ -280,7 +280,7 @@ export class TetherClient {
   async listAgents(): Promise<Agent[]> {
     this._requireApiKey();
     try {
-      const response = await fetch(`${this.baseUrl}/credentials`, {
+      const response = await fetch(`${this.baseUrl}/agents`, {
         method: 'GET',
         headers: {
           ...this._authHeaders()
@@ -317,7 +317,7 @@ export class TetherClient {
   async deleteAgent(agentId: string): Promise<boolean> {
     this._requireApiKey();
     try {
-      const response = await fetch(`${this.baseUrl}/credentials/${agentId}`, {
+      const response = await fetch(`${this.baseUrl}/agents/${agentId}`, {
         method: 'DELETE',
         headers: {
           ...this._authHeaders()

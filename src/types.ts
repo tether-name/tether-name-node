@@ -2,15 +2,15 @@
  * Configuration options for TetherClient
  */
 export interface TetherClientConfig {
-  /** The credential ID for the agent */
-  credentialId?: string;
+  /** The agent ID */
+  agentId?: string;
   /** Path to the private key file (DER or PEM format) */
   privateKeyPath?: string;
   /** Private key as a string (PEM format) */
   privateKeyPem?: string;
   /** Private key as a Buffer (DER format) */
   privateKeyBuffer?: Buffer;
-  /** API key for management operations (alternative to credential auth) */
+  /** API key for management operations (alternative to agent auth) */
   apiKey?: string;
 }
 
@@ -27,7 +27,7 @@ export interface ChallengeResponse {
 export interface VerificationRequest {
   challenge: string;
   proof: string;
-  credentialId: string;
+  agentId: string;
 }
 
 /**
@@ -81,9 +81,9 @@ export interface Agent {
 }
 
 /**
- * Response from the issue credential endpoint
+ * Response from the issue agent endpoint
  */
-export interface IssueCredentialResponse {
+export interface IssueAgentResponse {
   id: string;
   agentName: string;
   description: string;

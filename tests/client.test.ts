@@ -14,7 +14,7 @@ const BASE_URL = 'https://api.tether.name';
 
 function makeClient(overrides?: { apiKey?: string; noKey?: boolean }) {
   return new TetherClient({
-    credentialId: 'test-credential-id',
+    agentId: 'test-agent-id',
     privateKeyPem: overrides?.noKey ? undefined : privateKey,
     apiKey: overrides?.apiKey,
   });
@@ -68,7 +68,7 @@ describe('TetherClient - HTTP interactions', () => {
   });
 
   describe('submitProof', () => {
-    it('should POST proof to /challenge/verify with credentialId', async () => {
+    it('should POST proof to /challenge/verify with agentId', async () => {
       const mock = mockFetch({
         valid: true,
         agentName: 'Test Agent',
@@ -87,7 +87,7 @@ describe('TetherClient - HTTP interactions', () => {
       const body = JSON.parse(mock.mock.calls[0][1].body);
       expect(body.challenge).toBe('challenge-code');
       expect(body.proof).toBe('proof-signature');
-      expect(body.credentialId).toBe('test-credential-id');
+      expect(body.agentId).toBe('test-agent-id');
     });
 
     it('should throw TetherAPIError on HTTP error', async () => {
@@ -159,7 +159,7 @@ describe('TetherClient - HTTP interactions', () => {
   });
 
   describe('createAgent', () => {
-    it('should POST to /credentials/issue with auth header', async () => {
+    it('should POST to /agents/issue with auth header', async () => {
       const mock = mockFetch({
         id: 'agent-123',
         agentName: 'New Bot',
@@ -177,7 +177,7 @@ describe('TetherClient - HTTP interactions', () => {
       expect(agent.registrationToken).toBe('reg-token-xyz');
 
       const [url, opts] = mock.mock.calls[0];
-      expect(url).toBe(`${BASE_URL}/credentials/issue`);
+      expect(url).toBe(`${BASE_URL}/agents/issue`);
       expect(opts.method).toBe('POST');
       expect(opts.headers['Authorization']).toBe('Bearer test-api-key');
 
@@ -200,7 +200,7 @@ describe('TetherClient - HTTP interactions', () => {
   });
 
   describe('listAgents', () => {
-    it('should GET /credentials with auth header', async () => {
+    it('should GET /agents with auth header', async () => {
       const agents = [
         { id: 'a1', agentName: 'Bot 1', description: '', createdAt: 1700000000000 },
         { id: 'a2', agentName: 'Bot 2', description: 'helper', createdAt: 1700000001000 },
@@ -216,7 +216,7 @@ describe('TetherClient - HTTP interactions', () => {
       expect(result[1].agentName).toBe('Bot 2');
 
       const [url, opts] = mock.mock.calls[0];
-      expect(url).toBe(`${BASE_URL}/credentials`);
+      expect(url).toBe(`${BASE_URL}/agents`);
       expect(opts.method).toBe('GET');
       expect(opts.headers['Authorization']).toBe('Bearer test-api-key');
     });
@@ -228,7 +228,7 @@ describe('TetherClient - HTTP interactions', () => {
   });
 
   describe('deleteAgent', () => {
-    it('should DELETE /credentials/:id with auth header', async () => {
+    it('should DELETE /agents/:id with auth header', async () => {
       const mock = mockFetch({});
       globalThis.fetch = mock;
 
@@ -238,7 +238,7 @@ describe('TetherClient - HTTP interactions', () => {
       expect(result).toBe(true);
 
       const [url, opts] = mock.mock.calls[0];
-      expect(url).toBe(`${BASE_URL}/credentials/agent-to-delete`);
+      expect(url).toBe(`${BASE_URL}/agents/agent-to-delete`);
       expect(opts.method).toBe('DELETE');
       expect(opts.headers['Authorization']).toBe('Bearer test-api-key');
     });

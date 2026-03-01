@@ -16,7 +16,7 @@ Requires Node.js 20+ (uses native `fetch` and `crypto` modules).
 import { TetherClient } from 'tether-name';
 
 const client = new TetherClient({
-  credentialId: 'your-credential-id',
+  agentId: 'your-agent-id',
   privateKeyPath: '/path/to/your/private-key.pem'
 });
 
@@ -35,7 +35,7 @@ For more control over the verification process:
 import { TetherClient } from 'tether-name';
 
 const client = new TetherClient({
-  credentialId: 'your-credential-id',
+  agentId: 'your-agent-id',
   privateKeyPem: `-----BEGIN RSA PRIVATE KEY-----
 MIIEpAIBAAKCAQEA...
 -----END RSA PRIVATE KEY-----`
@@ -72,7 +72,7 @@ interface TetherClientConfig {
   apiKey?: string;                 // Or use TETHER_API_KEY env var
 
   // Credential ID (required for verify/sign, optional with apiKey)
-  credentialId?: string;           // Or use TETHER_CREDENTIAL_ID env var
+  agentId?: string;           // Or use TETHER_AGENT_ID env var
 
   // Private key (required for verify/sign, choose one)
   privateKeyPath?: string;         // Path to DER or PEM file
@@ -95,12 +95,12 @@ const client = new TetherClient({
 const agent = await client.createAgent('my-bot');
 ```
 
-**API key + credential + private key** — full access (management and verification):
+**API key + agent + private key** — full access (management and verification):
 
 ```typescript
 const client = new TetherClient({
   apiKey: 'sk-tether-name-...',
-  credentialId: 'your-credential-id',
+  agentId: 'your-agent-id',
   privateKeyPath: '/path/to/key.pem'
 });
 ```
@@ -109,7 +109,7 @@ const client = new TetherClient({
 
 ```typescript
 const client = new TetherClient({
-  credentialId: 'your-credential-id',
+  agentId: 'your-agent-id',
   privateKeyPath: '/path/to/key.pem'
 });
 ```
@@ -121,20 +121,20 @@ The SDK supports both PEM and DER private key formats:
 ```typescript
 // From file path (auto-detects format)
 const client1 = new TetherClient({
-  credentialId: 'your-id',
+  agentId: 'your-id',
   privateKeyPath: '/path/to/key.pem'    // or .der
 });
 
 // From PEM string
 const client2 = new TetherClient({
-  credentialId: 'your-id',
+  agentId: 'your-id',
   privateKeyPem: '-----BEGIN RSA PRIVATE KEY-----\n...'
 });
 
 // From DER buffer
 const derBuffer = fs.readFileSync('/path/to/key.der');
 const client3 = new TetherClient({
-  credentialId: 'your-id',
+  agentId: 'your-id',
   privateKeyBuffer: derBuffer
 });
 ```
@@ -150,7 +150,7 @@ const client = new TetherClient({ apiKey: 'sk-tether-name-...' });
 const agent = await client.createAgent('my-bot', 'Does helpful things');
 console.log(agent.id);              // "abc123"
 console.log(agent.agentName);       // "my-bot"
-console.log(agent.registrationToken); // Use to register credentials
+console.log(agent.registrationToken); // Use to register the agent
 
 // List all agents
 const agents = await client.listAgents();
@@ -161,11 +161,11 @@ await client.deleteAgent(agent.id);
 
 ## Environment Variables
 
-Set these environment variables to avoid hardcoding credentials:
+Set these environment variables to avoid hardcoding secrets:
 
 ```bash
 export TETHER_API_KEY="sk-tether-name-..."                        # API key for agent management
-export TETHER_CREDENTIAL_ID="your-credential-id"
+export TETHER_AGENT_ID="your-credential-id"
 export TETHER_PRIVATE_KEY_PATH="/path/to/your/private-key.pem"
 ```
 
@@ -251,7 +251,7 @@ interface Agent {
 ## Getting Your Credentials
 
 1. Visit [tether.name](https://tether.name)
-2. Register your agent and get a credential ID
+2. Register your agent and get an agent ID
 3. Generate an RSA-2048 private key:
 
 ```bash
