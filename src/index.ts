@@ -23,6 +23,7 @@ export type {
   TetherClientConfig,
   ChallengeResponse,
   Agent,
+  Domain,
   IssueAgentResponse,
   VerificationRequest,
   VerificationResponse,

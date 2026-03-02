@@ -164,17 +164,19 @@ describe('TetherClient - HTTP interactions', () => {
         id: 'agent-123',
         agentName: 'New Bot',
         description: 'A test bot',
+        domainId: 'domain-123',
         createdAt: 1700000000000,
         registrationToken: 'reg-token-xyz',
       });
       globalThis.fetch = mock;
 
       const client = makeClient({ apiKey: 'test-api-key' });
-      const agent = await client.createAgent('New Bot', 'A test bot');
+      const agent = await client.createAgent('New Bot', 'A test bot', 'domain-123');
 
       expect(agent.id).toBe('agent-123');
       expect(agent.agentName).toBe('New Bot');
       expect(agent.registrationToken).toBe('reg-token-xyz');
+      expect(agent.domainId).toBe('domain-123');
 
       const [url, opts] = mock.mock.calls[0];
       expect(url).toBe(`${BASE_URL}/agents/issue`);
@@ -184,6 +186,7 @@ describe('TetherClient - HTTP interactions', () => {
       const body = JSON.parse(opts.body);
       expect(body.agentName).toBe('New Bot');
       expect(body.description).toBe('A test bot');
+      expect(body.domainId).toBe('domain-123');
     });
 
     it('should throw when no API key is configured', async () => {
@@ -224,6 +227,34 @@ describe('TetherClient - HTTP interactions', () => {
     it('should throw when no API key is configured', async () => {
       const client = makeClient();
       await expect(client.listAgents()).rejects.toThrow();
+    });
+  });
+
+  describe('listDomains', () => {
+    it('should GET /domains with auth header', async () => {
+      const domains = [
+        { id: 'd1', domain: 'example.com', verified: true, verifiedAt: 1700000000000, lastCheckedAt: 1700001000000, createdAt: 1699999000000 },
+        { id: 'd2', domain: 'example.org', verified: false, verifiedAt: 0, lastCheckedAt: 0, createdAt: 1699998000000 },
+      ];
+      const mock = mockFetch(domains);
+      globalThis.fetch = mock;
+
+      const client = makeClient({ apiKey: 'test-api-key' });
+      const result = await client.listDomains();
+
+      expect(result).toHaveLength(2);
+      expect(result[0].domain).toBe('example.com');
+      expect(result[1].verified).toBe(false);
+
+      const [url, opts] = mock.mock.calls[0];
+      expect(url).toBe(`${BASE_URL}/domains`);
+      expect(opts.method).toBe('GET');
+      expect(opts.headers['Authorization']).toBe('Bearer test-api-key');
+    });
+
+    it('should throw when no API key is configured', async () => {
+      const client = makeClient();
+      await expect(client.listDomains()).rejects.toThrow();
     });
   });
 

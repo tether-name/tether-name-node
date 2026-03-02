@@ -242,6 +242,7 @@ var TetherClient = class {
         agentName: data.agentName,
         verifyUrl: data.verifyUrl,
         email: data.email,
+        domain: data.domain,
         registeredSince,
         error: data.error,
         challenge
@@ -285,7 +286,7 @@ var TetherClient = class {
   /**
    * Create a new agent
    */
-  async createAgent(agentName, description = "") {
+  async createAgent(agentName, description = "", domainId) {
     this._requireApiKey();
     try {
       const response = await fetch(`${this.baseUrl}/agents/issue`, {
@@ -294,7 +295,7 @@ var TetherClient = class {
           "Content-Type": "application/json",
           ...this._authHeaders()
         },
-        body: JSON.stringify({ agentName, description })
+        body: JSON.stringify({ agentName, description, ...domainId ? { domainId } : {} })
       });
       if (!response.ok) {
         const errorText = await response.text().catch(() => "Unknown error");
@@ -346,6 +347,40 @@ var TetherClient = class {
       }
       throw new TetherAPIError(
         `Failed to list agents: ${error instanceof Error ? error.message : String(error)}`,
+        void 0,
+        void 0,
+        error instanceof Error ? error : void 0
+      );
+    }
+  }
+  /**
+   * List all registered domains
+   */
+  async listDomains() {
+    this._requireApiKey();
+    try {
+      const response = await fetch(`${this.baseUrl}/domains`, {
+        method: "GET",
+        headers: {
+          ...this._authHeaders()
+        }
+      });
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => "Unknown error");
+        throw new TetherAPIError(
+          `List domains failed: ${response.status} ${response.statusText}`,
+          response.status,
+          errorText
+        );
+      }
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (error instanceof TetherError) {
+        throw error;
+      }
+      throw new TetherAPIError(
+        `Failed to list domains: ${error instanceof Error ? error.message : String(error)}`,
         void 0,
         void 0,
         error instanceof Error ? error : void 0

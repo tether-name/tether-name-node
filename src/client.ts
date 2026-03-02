@@ -5,6 +5,7 @@ import type {
   TetherClientConfig,
   ChallengeResponse,
   Agent,
+  Domain,
   IssueAgentResponse,
   VerificationRequest,
   VerificationResponse,
@@ -191,6 +192,7 @@ export class TetherClient {
         agentName: data.agentName,
         verifyUrl: data.verifyUrl,
         email: data.email,
+        domain: data.domain,
         registeredSince,
         error: data.error,
         challenge
@@ -238,7 +240,7 @@ export class TetherClient {
   /**
    * Create a new agent
    */
-  async createAgent(agentName: string, description: string = ''): Promise<Agent> {
+  async createAgent(agentName: string, description: string = '', domainId?: string): Promise<Agent> {
     this._requireApiKey();
     try {
       const response = await fetch(`${this.baseUrl}/agents/issue`, {
@@ -247,7 +249,7 @@ export class TetherClient {
           'Content-Type': 'application/json',
           ...this._authHeaders()
         },
-        body: JSON.stringify({ agentName, description })
+        body: JSON.stringify({ agentName, description, ...(domainId ? { domainId } : {}) })
       });
 
       if (!response.ok) {
@@ -304,6 +306,43 @@ export class TetherClient {
       }
       throw new TetherAPIError(
         `Failed to list agents: ${error instanceof Error ? error.message : String(error)}`,
+        undefined,
+        undefined,
+        error instanceof Error ? error : undefined
+      );
+    }
+  }
+
+  /**
+   * List all registered domains
+   */
+  async listDomains(): Promise<Domain[]> {
+    this._requireApiKey();
+    try {
+      const response = await fetch(`${this.baseUrl}/domains`, {
+        method: 'GET',
+        headers: {
+          ...this._authHeaders()
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new TetherAPIError(
+          `List domains failed: ${response.status} ${response.statusText}`,
+          response.status,
+          errorText
+        );
+      }
+
+      const data = await response.json() as Domain[];
+      return data;
+    } catch (error) {
+      if (error instanceof TetherError) {
+        throw error;
+      }
+      throw new TetherAPIError(
+        `Failed to list domains: ${error instanceof Error ? error.message : String(error)}`,
         undefined,
         undefined,
         error instanceof Error ? error : undefined

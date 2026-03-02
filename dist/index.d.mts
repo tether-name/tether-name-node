@@ -37,6 +37,7 @@ interface VerificationResponse {
     verifyUrl?: string;
     agentName?: string;
     email?: string;
+    domain?: string;
     /** Raw API value (epoch ms from service; older services may return ISO strings) */
     registeredSince?: number | string;
     error?: string;
@@ -53,6 +54,8 @@ interface VerificationResult {
     verifyUrl?: string;
     /** The agent's registered email */
     email?: string;
+    /** Verified domain (if this agent has a domain assigned) */
+    domain?: string;
     /** ISO date string of when the agent was registered */
     registeredSince?: string;
     /** Error message if verification failed */
@@ -71,9 +74,22 @@ interface Agent {
     id: string;
     agentName: string;
     description: string;
+    domainId?: string;
+    domain?: string | null;
     createdAt: number;
     registrationToken?: string;
     lastVerifiedAt?: number;
+}
+/**
+ * A domain registered to the authenticated account
+ */
+interface Domain {
+    id: string;
+    domain: string;
+    verified: boolean;
+    verifiedAt: number;
+    lastCheckedAt: number;
+    createdAt: number;
 }
 /**
  * Response from the issue agent endpoint
@@ -82,6 +98,7 @@ interface IssueAgentResponse {
     id: string;
     agentName: string;
     description: string;
+    domainId?: string;
     createdAt: number;
     registrationToken: string;
 }
@@ -130,11 +147,15 @@ declare class TetherClient {
     /**
      * Create a new agent
      */
-    createAgent(agentName: string, description?: string): Promise<Agent>;
+    createAgent(agentName: string, description?: string, domainId?: string): Promise<Agent>;
     /**
      * List all agents
      */
     listAgents(): Promise<Agent[]>;
+    /**
+     * List all registered domains
+     */
+    listDomains(): Promise<Domain[]>;
     /**
      * Delete an agent by ID
      */
@@ -181,4 +202,4 @@ declare function signChallenge(privateKey: KeyObject, challenge: string): string
  */
 declare function detectKeyFormat(keyPath: string): KeyFormat;
 
-export { type Agent, type ChallengeResponse, type IssueAgentResponse, type KeyFormat, TetherAPIError, TetherClient, type TetherClientConfig, TetherError, TetherVerificationError, type VerificationRequest, type VerificationResponse, type VerificationResult, detectKeyFormat, loadPrivateKey, signChallenge };
+export { type Agent, type ChallengeResponse, type Domain, type IssueAgentResponse, type KeyFormat, TetherAPIError, TetherClient, type TetherClientConfig, TetherError, TetherVerificationError, type VerificationRequest, type VerificationResponse, type VerificationResult, detectKeyFormat, loadPrivateKey, signChallenge };

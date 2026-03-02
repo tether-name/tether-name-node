@@ -38,6 +38,7 @@ export interface VerificationResponse {
   verifyUrl?: string;
   agentName?: string;
   email?: string;
+  domain?: string;
   /** Raw API value (epoch ms from service; older services may return ISO strings) */
   registeredSince?: number | string;
   error?: string;
@@ -55,6 +56,8 @@ export interface VerificationResult {
   verifyUrl?: string;
   /** The agent's registered email */
   email?: string;
+  /** Verified domain (if this agent has a domain assigned) */
+  domain?: string;
   /** ISO date string of when the agent was registered */
   registeredSince?: string;
   /** Error message if verification failed */
@@ -75,9 +78,23 @@ export interface Agent {
   id: string;
   agentName: string;
   description: string;
+  domainId?: string;
+  domain?: string | null;
   createdAt: number;
   registrationToken?: string;
   lastVerifiedAt?: number;
+}
+
+/**
+ * A domain registered to the authenticated account
+ */
+export interface Domain {
+  id: string;
+  domain: string;
+  verified: boolean;
+  verifiedAt: number;
+  lastCheckedAt: number;
+  createdAt: number;
 }
 
 /**
@@ -87,6 +104,7 @@ export interface IssueAgentResponse {
   id: string;
   agentName: string;
   description: string;
+  domainId?: string;
   createdAt: number;
   registrationToken: string;
 }

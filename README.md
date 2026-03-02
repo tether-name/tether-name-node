@@ -147,13 +147,16 @@ Create and manage agents programmatically with an API key:
 const client = new TetherClient({ apiKey: 'sk-tether-name-...' });
 
 // Create an agent
-const agent = await client.createAgent('my-bot', 'Does helpful things');
+const agent = await client.createAgent('my-bot', 'Does helpful things', 'verified-domain-id');
 console.log(agent.id);              // "abc123"
 console.log(agent.agentName);       // "my-bot"
 console.log(agent.registrationToken); // Use to register the agent
 
 // List all agents
 const agents = await client.listAgents();
+
+// List registered domains
+const domains = await client.listDomains();
 
 // Delete an agent
 await client.deleteAgent(agent.id);
@@ -205,13 +208,17 @@ Signs a challenge using the configured private key.
 
 Submits signed proof to verify the challenge.
 
-#### `async createAgent(agentName: string, description?: string): Promise<Agent>`
+#### `async createAgent(agentName: string, description?: string, domainId?: string): Promise<Agent>`
 
-Creates a new agent. Requires API key authentication.
+Creates a new agent. Requires API key authentication. `domainId` is optional and links this agent to a verified domain.
 
 #### `async listAgents(): Promise<Agent[]>`
 
 Lists all agents for the authenticated account. Requires API key authentication.
+
+#### `async listDomains(): Promise<Domain[]>`
+
+Lists all registered domains for the authenticated account. Requires API key authentication.
 
 #### `async deleteAgent(agentId: string): Promise<boolean>`
 
@@ -225,6 +232,7 @@ interface VerificationResult {
   agentName?: string;          // Registered agent name
   verifyUrl?: string;          // Public verification URL
   email?: string;              // Registered email
+  domain?: string;             // Verified domain (if assigned)
   registeredSince?: string;    // ISO date of registration
   error?: string;              // Error message if failed
   challenge?: string;          // The verified challenge
@@ -236,9 +244,22 @@ interface Agent {
   id: string;                  // Unique agent ID
   agentName: string;           // Agent display name
   description: string;         // Agent description
+  domainId?: string;           // Optional assigned domain ID
+  domain?: string | null;      // Resolved assigned domain name
   createdAt: number;           // Creation time (epoch ms)
   registrationToken?: string;  // Token for key registration (returned on create)
   lastVerifiedAt?: number;     // Last verification time (epoch ms)
+}
+```
+
+```typescript
+interface Domain {
+  id: string;
+  domain: string;
+  verified: boolean;
+  verifiedAt: number;
+  lastCheckedAt: number;
+  createdAt: number;
 }
 ```
 
