@@ -160,6 +160,23 @@ const domains = await client.listDomains();
 
 // Delete an agent
 await client.deleteAgent(agent.id);
+
+// List key lifecycle entries for an agent
+const keys = await client.listAgentKeys(agent.id);
+
+// Rotate key (requires step-up via email code OR challenge+proof)
+const rotated = await client.rotateAgentKey(agent.id, {
+  publicKey: 'BASE64_SPKI_PUBLIC_KEY',
+  gracePeriodHours: 24,
+  reason: 'routine_rotation',
+  stepUpCode: '123456',
+});
+
+// Revoke a key
+const revoked = await client.revokeAgentKey(agent.id, rotated.newKeyId, {
+  reason: 'compromised',
+  stepUpCode: '654321',
+});
 ```
 
 ## Environment Variables
@@ -224,6 +241,18 @@ Lists all registered domains for the authenticated account. Requires API key aut
 
 Deletes an agent by ID. Requires API key authentication. Returns `true` on success.
 
+#### `async listAgentKeys(agentId: string): Promise<AgentKey[]>`
+
+Lists key lifecycle entries (`active`, `grace`, `revoked`) for an agent. Requires API key authentication.
+
+#### `async rotateAgentKey(agentId: string, request: RotateAgentKeyRequest): Promise<RotateAgentKeyResponse>`
+
+Rotates an agent key. Requires API key authentication plus step-up verification via either `stepUpCode` or `challenge` + `proof`.
+
+#### `async revokeAgentKey(agentId: string, keyId: string, request?: RevokeAgentKeyRequest): Promise<RevokeAgentKeyResponse>`
+
+Revokes an agent key. Requires API key authentication plus step-up verification via either `stepUpCode` or `challenge` + `proof`.
+
 ### Types
 
 ```typescript
@@ -260,6 +289,34 @@ interface Domain {
   verifiedAt: number;
   lastCheckedAt: number;
   createdAt: number;
+}
+```
+
+```typescript
+interface AgentKey {
+  id: string;
+  status: 'active' | 'grace' | 'revoked';
+  createdAt: number;
+  activatedAt: number;
+  graceUntil: number;
+  revokedAt: number;
+  revokedReason: string;
+}
+
+interface RotateAgentKeyRequest {
+  publicKey: string;
+  gracePeriodHours?: number;
+  reason?: string;
+  stepUpCode?: string;
+  challenge?: string;
+  proof?: string;
+}
+
+interface RevokeAgentKeyRequest {
+  reason?: string;
+  stepUpCode?: string;
+  challenge?: string;
+  proof?: string;
 }
 ```
 

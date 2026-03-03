@@ -287,6 +287,89 @@ describe('TetherClient - HTTP interactions', () => {
     });
   });
 
+  describe('key lifecycle management', () => {
+    it('should GET /agents/:id/keys with auth header', async () => {
+      const keys = [
+        { id: 'k1', status: 'active', createdAt: 1, activatedAt: 1, graceUntil: 0, revokedAt: 0, revokedReason: '' },
+        { id: 'k0', status: 'grace', createdAt: 0, activatedAt: 0, graceUntil: 1000, revokedAt: 0, revokedReason: 'rotated' },
+      ];
+      const mock = mockFetch(keys);
+      globalThis.fetch = mock;
+
+      const client = makeClient({ apiKey: 'test-api-key' });
+      const result = await client.listAgentKeys('agent-1');
+
+      expect(result).toHaveLength(2);
+      expect(result[0].id).toBe('k1');
+
+      const [url, opts] = mock.mock.calls[0];
+      expect(url).toBe(`${BASE_URL}/agents/agent-1/keys`);
+      expect(opts.method).toBe('GET');
+      expect(opts.headers['Authorization']).toBe('Bearer test-api-key');
+    });
+
+    it('should POST /agents/:id/keys/rotate with step-up payload', async () => {
+      const mock = mockFetch({
+        agentId: 'agent-1',
+        previousKeyId: 'k-old',
+        newKeyId: 'k-new',
+        graceUntil: 123456,
+        message: 'Key rotated successfully',
+      });
+      globalThis.fetch = mock;
+
+      const client = makeClient({ apiKey: 'test-api-key' });
+      const result = await client.rotateAgentKey('agent-1', {
+        publicKey: 'base64-spki-key',
+        gracePeriodHours: 24,
+        reason: 'routine_rotation',
+        stepUpCode: '123456',
+      });
+
+      expect(result.newKeyId).toBe('k-new');
+      const [url, opts] = mock.mock.calls[0];
+      expect(url).toBe(`${BASE_URL}/agents/agent-1/keys/rotate`);
+      expect(opts.method).toBe('POST');
+      expect(opts.headers['Authorization']).toBe('Bearer test-api-key');
+      const body = JSON.parse(opts.body);
+      expect(body.publicKey).toBe('base64-spki-key');
+      expect(body.stepUpCode).toBe('123456');
+    });
+
+    it('should POST /agents/:id/keys/:keyId/revoke with challenge-proof step-up payload', async () => {
+      const mock = mockFetch({
+        agentId: 'agent-1',
+        keyId: 'k-new',
+        revoked: true,
+        promotedKeyId: 'k-old',
+        message: 'Key revoked',
+      });
+      globalThis.fetch = mock;
+
+      const client = makeClient({ apiKey: 'test-api-key' });
+      const result = await client.revokeAgentKey('agent-1', 'k-new', {
+        reason: 'compromised',
+        challenge: 'challenge-code',
+        proof: 'signed-proof',
+      });
+
+      expect(result.revoked).toBe(true);
+      const [url, opts] = mock.mock.calls[0];
+      expect(url).toBe(`${BASE_URL}/agents/agent-1/keys/k-new/revoke`);
+      expect(opts.method).toBe('POST');
+      const body = JSON.parse(opts.body);
+      expect(body.challenge).toBe('challenge-code');
+      expect(body.proof).toBe('signed-proof');
+    });
+
+    it('should throw when no API key is configured for key lifecycle methods', async () => {
+      const client = makeClient();
+      await expect(client.listAgentKeys('agent-1')).rejects.toThrow();
+      await expect(client.rotateAgentKey('agent-1', { publicKey: 'k' })).rejects.toThrow();
+      await expect(client.revokeAgentKey('agent-1', 'key-1')).rejects.toThrow();
+    });
+  });
+
   describe('error handling', () => {
     it('should wrap network errors in TetherAPIError', async () => {
       globalThis.fetch = vi.fn().mockRejectedValue(new Error('Network failure'));

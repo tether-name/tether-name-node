@@ -108,3 +108,66 @@ export interface IssueAgentResponse {
   createdAt: number;
   registrationToken: string;
 }
+
+/**
+ * Agent key lifecycle entry
+ */
+export interface AgentKey {
+  id: string;
+  status: 'active' | 'grace' | 'revoked';
+  createdAt: number;
+  activatedAt: number;
+  graceUntil: number;
+  revokedAt: number;
+  revokedReason: string;
+}
+
+/**
+ * Step-up authentication inputs for sensitive key operations
+ */
+export interface StepUpAuthInput {
+  /** Optional email step-up code */
+  stepUpCode?: string;
+  /** Optional challenge code for key-proof step-up */
+  challenge?: string;
+  /** Optional signature for key-proof step-up */
+  proof?: string;
+}
+
+/**
+ * Rotate key request options
+ */
+export interface RotateAgentKeyRequest extends StepUpAuthInput {
+  publicKey: string;
+  gracePeriodHours?: number;
+  reason?: string;
+}
+
+/**
+ * Rotate key API response
+ */
+export interface RotateAgentKeyResponse {
+  agentId: string;
+  previousKeyId?: string | null;
+  newKeyId: string;
+  graceUntil: number;
+  message: string;
+}
+
+/**
+ * Revoke key request options
+ */
+export interface RevokeAgentKeyRequest extends StepUpAuthInput {
+  reason?: string;
+}
+
+/**
+ * Revoke key API response
+ */
+export interface RevokeAgentKeyResponse {
+  agentId: string;
+  keyId: string;
+  revoked: boolean;
+  promotedKeyId?: string | null;
+  message: string;
+}

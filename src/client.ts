@@ -9,7 +9,12 @@ import type {
   IssueAgentResponse,
   VerificationRequest,
   VerificationResponse,
-  VerificationResult
+  VerificationResult,
+  AgentKey,
+  RotateAgentKeyRequest,
+  RotateAgentKeyResponse,
+  RevokeAgentKeyRequest,
+  RevokeAgentKeyResponse
 } from './types.js';
 
 /**
@@ -385,4 +390,133 @@ export class TetherClient {
       );
     }
   }
+
+  /**
+   * List key lifecycle entries for an agent.
+   */
+  async listAgentKeys(agentId: string): Promise<AgentKey[]> {
+    this._requireApiKey();
+    try {
+      const response = await fetch(`${this.baseUrl}/agents/${agentId}/keys`, {
+        method: 'GET',
+        headers: {
+          ...this._authHeaders()
+        }
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new TetherAPIError(
+          `List agent keys failed: ${response.status} ${response.statusText}`,
+          response.status,
+          errorText
+        );
+      }
+
+      return await response.json() as AgentKey[];
+    } catch (error) {
+      if (error instanceof TetherError) {
+        throw error;
+      }
+      throw new TetherAPIError(
+        `Failed to list agent keys: ${error instanceof Error ? error.message : String(error)}`,
+        undefined,
+        undefined,
+        error instanceof Error ? error : undefined
+      );
+    }
+  }
+
+  /**
+   * Rotate an agent key with optional step-up auth.
+   */
+  async rotateAgentKey(agentId: string, request: RotateAgentKeyRequest): Promise<RotateAgentKeyResponse> {
+    this._requireApiKey();
+    try {
+      const payload: RotateAgentKeyRequest = {
+        publicKey: request.publicKey,
+        ...(request.gracePeriodHours !== undefined ? { gracePeriodHours: request.gracePeriodHours } : {}),
+        ...(request.reason ? { reason: request.reason } : {}),
+        ...(request.stepUpCode ? { stepUpCode: request.stepUpCode } : {}),
+        ...(request.challenge ? { challenge: request.challenge } : {}),
+        ...(request.proof ? { proof: request.proof } : {}),
+      };
+
+      const response = await fetch(`${this.baseUrl}/agents/${agentId}/keys/rotate`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this._authHeaders()
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new TetherAPIError(
+          `Rotate key failed: ${response.status} ${response.statusText}`,
+          response.status,
+          errorText
+        );
+      }
+
+      return await response.json() as RotateAgentKeyResponse;
+    } catch (error) {
+      if (error instanceof TetherError) {
+        throw error;
+      }
+      throw new TetherAPIError(
+        `Failed to rotate agent key: ${error instanceof Error ? error.message : String(error)}`,
+        undefined,
+        undefined,
+        error instanceof Error ? error : undefined
+      );
+    }
+  }
+
+  /**
+   * Revoke an agent key with optional step-up auth.
+   */
+  async revokeAgentKey(agentId: string, keyId: string, request: RevokeAgentKeyRequest = {}): Promise<RevokeAgentKeyResponse> {
+    this._requireApiKey();
+    try {
+      const payload: RevokeAgentKeyRequest = {
+        ...(request.reason ? { reason: request.reason } : {}),
+        ...(request.stepUpCode ? { stepUpCode: request.stepUpCode } : {}),
+        ...(request.challenge ? { challenge: request.challenge } : {}),
+        ...(request.proof ? { proof: request.proof } : {}),
+      };
+
+      const response = await fetch(`${this.baseUrl}/agents/${agentId}/keys/${keyId}/revoke`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this._authHeaders()
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new TetherAPIError(
+          `Revoke key failed: ${response.status} ${response.statusText}`,
+          response.status,
+          errorText
+        );
+      }
+
+      return await response.json() as RevokeAgentKeyResponse;
+    } catch (error) {
+      if (error instanceof TetherError) {
+        throw error;
+      }
+      throw new TetherAPIError(
+        `Failed to revoke agent key: ${error instanceof Error ? error.message : String(error)}`,
+        undefined,
+        undefined,
+        error instanceof Error ? error : undefined
+      );
+    }
+  }
 }
+

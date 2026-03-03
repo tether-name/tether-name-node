@@ -28,6 +28,12 @@ export type {
   VerificationRequest,
   VerificationResponse,
   VerificationResult,
+  AgentKey,
+  StepUpAuthInput,
+  RotateAgentKeyRequest,
+  RotateAgentKeyResponse,
+  RevokeAgentKeyRequest,
+  RevokeAgentKeyResponse,
   KeyFormat
 } from './types.js';
 

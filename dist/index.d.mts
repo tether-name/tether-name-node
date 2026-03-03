@@ -102,6 +102,63 @@ interface IssueAgentResponse {
     createdAt: number;
     registrationToken: string;
 }
+/**
+ * Agent key lifecycle entry
+ */
+interface AgentKey {
+    id: string;
+    status: 'active' | 'grace' | 'revoked';
+    createdAt: number;
+    activatedAt: number;
+    graceUntil: number;
+    revokedAt: number;
+    revokedReason: string;
+}
+/**
+ * Step-up authentication inputs for sensitive key operations
+ */
+interface StepUpAuthInput {
+    /** Optional email step-up code */
+    stepUpCode?: string;
+    /** Optional challenge code for key-proof step-up */
+    challenge?: string;
+    /** Optional signature for key-proof step-up */
+    proof?: string;
+}
+/**
+ * Rotate key request options
+ */
+interface RotateAgentKeyRequest extends StepUpAuthInput {
+    publicKey: string;
+    gracePeriodHours?: number;
+    reason?: string;
+}
+/**
+ * Rotate key API response
+ */
+interface RotateAgentKeyResponse {
+    agentId: string;
+    previousKeyId?: string | null;
+    newKeyId: string;
+    graceUntil: number;
+    message: string;
+}
+/**
+ * Revoke key request options
+ */
+interface RevokeAgentKeyRequest extends StepUpAuthInput {
+    reason?: string;
+}
+/**
+ * Revoke key API response
+ */
+interface RevokeAgentKeyResponse {
+    agentId: string;
+    keyId: string;
+    revoked: boolean;
+    promotedKeyId?: string | null;
+    message: string;
+}
 
 /**
  * TetherClient - Official SDK for tether.name agent identity verification
@@ -160,6 +217,18 @@ declare class TetherClient {
      * Delete an agent by ID
      */
     deleteAgent(agentId: string): Promise<boolean>;
+    /**
+     * List key lifecycle entries for an agent.
+     */
+    listAgentKeys(agentId: string): Promise<AgentKey[]>;
+    /**
+     * Rotate an agent key with optional step-up auth.
+     */
+    rotateAgentKey(agentId: string, request: RotateAgentKeyRequest): Promise<RotateAgentKeyResponse>;
+    /**
+     * Revoke an agent key with optional step-up auth.
+     */
+    revokeAgentKey(agentId: string, keyId: string, request?: RevokeAgentKeyRequest): Promise<RevokeAgentKeyResponse>;
 }
 
 /**
@@ -202,4 +271,4 @@ declare function signChallenge(privateKey: KeyObject, challenge: string): string
  */
 declare function detectKeyFormat(keyPath: string): KeyFormat;
 
-export { type Agent, type ChallengeResponse, type Domain, type IssueAgentResponse, type KeyFormat, TetherAPIError, TetherClient, type TetherClientConfig, TetherError, TetherVerificationError, type VerificationRequest, type VerificationResponse, type VerificationResult, detectKeyFormat, loadPrivateKey, signChallenge };
+export { type Agent, type AgentKey, type ChallengeResponse, type Domain, type IssueAgentResponse, type KeyFormat, type RevokeAgentKeyRequest, type RevokeAgentKeyResponse, type RotateAgentKeyRequest, type RotateAgentKeyResponse, type StepUpAuthInput, TetherAPIError, TetherClient, type TetherClientConfig, TetherError, TetherVerificationError, type VerificationRequest, type VerificationResponse, type VerificationResult, detectKeyFormat, loadPrivateKey, signChallenge };
