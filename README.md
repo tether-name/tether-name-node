@@ -68,7 +68,7 @@ try {
 
 ```typescript
 interface TetherClientConfig {
-  // API key (for agent management — no private key needed)
+  // Management bearer token (API key or JWT)
   apiKey?: string;                 // Or use TETHER_API_KEY env var
 
   // Agent ID (required for verify/sign, optional with apiKey)
@@ -85,7 +85,7 @@ interface TetherClientConfig {
 
 ### Authentication Modes
 
-**API key only** — manage agents without a private key:
+**Bearer token only** — manage agents without a private key:
 
 ```typescript
 const client = new TetherClient({
@@ -95,7 +95,7 @@ const client = new TetherClient({
 const agent = await client.createAgent('my-bot');
 ```
 
-**API key + agent + private key** — full access (management and verification):
+**Bearer token + agent + private key** — full access (management and verification):
 
 ```typescript
 const client = new TetherClient({
@@ -141,7 +141,7 @@ const client3 = new TetherClient({
 
 ## Agent Management
 
-Create and manage agents programmatically with an API key:
+Create and manage agents programmatically with a bearer token:
 
 ```typescript
 const client = new TetherClient({ apiKey: 'sk-tether-name-...' });
@@ -184,7 +184,7 @@ const revoked = await client.revokeAgentKey(agent.id, rotated.newKeyId, {
 Set these environment variables to avoid hardcoding secrets:
 
 ```bash
-export TETHER_API_KEY="sk-tether-name-..."                        # API key for agent management
+export TETHER_API_KEY="sk-tether-name-..."                        # Management bearer token (API key or JWT)
 export TETHER_AGENT_ID="your-agent-id"
 export TETHER_PRIVATE_KEY_PATH="/path/to/your/private-key.pem"
 ```
@@ -227,31 +227,31 @@ Submits signed proof to verify the challenge.
 
 #### `async createAgent(agentName: string, description?: string, domainId?: string): Promise<Agent>`
 
-Creates a new agent. Requires API key authentication. `domainId` is optional and links this agent to a verified domain.
+Creates a new agent. Requires bearer auth (`Authorization: Bearer ...`, JWT or API key). `domainId` is optional and links this agent to a verified domain.
 
 #### `async listAgents(): Promise<Agent[]>`
 
-Lists all agents for the authenticated account. Requires API key authentication.
+Lists all agents for the authenticated account. Requires bearer auth (JWT or API key).
 
 #### `async listDomains(): Promise<Domain[]>`
 
-Lists all registered domains for the authenticated account. Requires API key authentication.
+Lists all registered domains for the authenticated account. Requires bearer auth (JWT or API key).
 
 #### `async deleteAgent(agentId: string): Promise<boolean>`
 
-Deletes an agent by ID. Requires API key authentication. Returns `true` on success.
+Deletes an agent by ID. Requires bearer auth (JWT or API key). Returns `true` on success.
 
 #### `async listAgentKeys(agentId: string): Promise<AgentKey[]>`
 
-Lists key lifecycle entries (`active`, `grace`, `revoked`) for an agent. Requires API key authentication.
+Lists key lifecycle entries (`active`, `grace`, `revoked`) for an agent. Requires bearer auth (JWT or API key).
 
 #### `async rotateAgentKey(agentId: string, request: RotateAgentKeyRequest): Promise<RotateAgentKeyResponse>`
 
-Rotates an agent key. Requires API key authentication plus step-up verification via either `stepUpCode` or `challenge` + `proof`.
+Rotates an agent key. Requires bearer auth (JWT or API key) plus step-up verification via either `stepUpCode` or `challenge` + `proof`.
 
 #### `async revokeAgentKey(agentId: string, keyId: string, request?: RevokeAgentKeyRequest): Promise<RevokeAgentKeyResponse>`
 
-Revokes an agent key. Requires API key authentication plus step-up verification via either `stepUpCode` or `challenge` + `proof`.
+Revokes an agent key. Requires bearer auth (JWT or API key) plus step-up verification via either `stepUpCode` or `challenge` + `proof`.
 
 ### Types
 
