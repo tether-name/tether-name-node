@@ -25,6 +25,7 @@ export type {
   Agent,
   Domain,
   IssueAgentResponse,
+  UpdateAgentResponse,
   VerificationRequest,
   VerificationResponse,
   VerificationResult,

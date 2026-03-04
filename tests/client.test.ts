@@ -287,6 +287,49 @@ describe('TetherClient - HTTP interactions', () => {
     });
   });
 
+  describe('updateAgentDomain', () => {
+    it('should PATCH /agents/:id with selected domain', async () => {
+      const mock = mockFetch({
+        id: 'agent-1',
+        domainId: 'domain-1',
+        domain: 'example.com',
+        message: 'ok',
+      });
+      globalThis.fetch = mock;
+
+      const client = makeClient({ apiKey: 'test-api-key' });
+      const result = await client.updateAgentDomain('agent-1', 'domain-1');
+
+      expect(result.domainId).toBe('domain-1');
+      expect(result.domain).toBe('example.com');
+
+      const [url, opts] = mock.mock.calls[0];
+      expect(url).toBe(`${BASE_URL}/agents/agent-1`);
+      expect(opts.method).toBe('PATCH');
+      expect(opts.headers['Authorization']).toBe('Bearer test-api-key');
+      expect(opts.headers['Content-Type']).toBe('application/json');
+      const body = JSON.parse(opts.body);
+      expect(body.domainId).toBe('domain-1');
+    });
+
+    it('should send empty domainId when reverting to email', async () => {
+      const mock = mockFetch({ id: 'agent-1', message: 'ok' });
+      globalThis.fetch = mock;
+
+      const client = makeClient({ apiKey: 'test-api-key' });
+      await client.updateAgentDomain('agent-1');
+
+      const [, opts] = mock.mock.calls[0];
+      const body = JSON.parse(opts.body);
+      expect(body.domainId).toBe('');
+    });
+
+    it('should throw when no API key is configured', async () => {
+      const client = makeClient();
+      await expect(client.updateAgentDomain('agent-1', 'domain-1')).rejects.toThrow();
+    });
+  });
+
   describe('key lifecycle management', () => {
     it('should GET /agents/:id/keys with auth header', async () => {
       const keys = [

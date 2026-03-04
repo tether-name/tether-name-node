@@ -110,6 +110,16 @@ export interface IssueAgentResponse {
 }
 
 /**
+ * Response from updating an agent's verification identity display
+ */
+export interface UpdateAgentResponse {
+  id: string;
+  domainId?: string;
+  domain?: string | null;
+  message: string;
+}
+
+/**
  * Agent key lifecycle entry
  */
 export interface AgentKey {

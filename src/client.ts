@@ -14,7 +14,8 @@ import type {
   RotateAgentKeyRequest,
   RotateAgentKeyResponse,
   RevokeAgentKeyRequest,
-  RevokeAgentKeyResponse
+  RevokeAgentKeyResponse,
+  UpdateAgentResponse
 } from './types.js';
 
 /**
@@ -384,6 +385,45 @@ export class TetherClient {
       }
       throw new TetherAPIError(
         `Failed to delete agent: ${error instanceof Error ? error.message : String(error)}`,
+        undefined,
+        undefined,
+        error instanceof Error ? error : undefined
+      );
+    }
+  }
+
+  /**
+   * Update which identity is shown when this agent is verified.
+   * Pass an empty string to show the account email; pass a verified domain ID to show that domain.
+   */
+  async updateAgentDomain(agentId: string, domainId: string = ''): Promise<UpdateAgentResponse> {
+    this._requireApiKey();
+    try {
+      const response = await fetch(`${this.baseUrl}/agents/${agentId}`, {
+        method: 'PATCH',
+        headers: {
+          'Content-Type': 'application/json',
+          ...this._authHeaders()
+        },
+        body: JSON.stringify({ domainId })
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text().catch(() => 'Unknown error');
+        throw new TetherAPIError(
+          `Update agent failed: ${response.status} ${response.statusText}`,
+          response.status,
+          errorText
+        );
+      }
+
+      return await response.json() as UpdateAgentResponse;
+    } catch (error) {
+      if (error instanceof TetherError) {
+        throw error;
+      }
+      throw new TetherAPIError(
+        `Failed to update agent: ${error instanceof Error ? error.message : String(error)}`,
         undefined,
         undefined,
         error instanceof Error ? error : undefined

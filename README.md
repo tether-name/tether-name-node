@@ -158,6 +158,12 @@ const agents = await client.listAgents();
 // List registered domains
 const domains = await client.listDomains();
 
+// Update which identity shows on verification
+// Pass a verified domain ID to show that domain:
+await client.updateAgentDomain(agent.id, 'verified-domain-id');
+// Or pass empty string to show account email:
+await client.updateAgentDomain(agent.id, '');
+
 // Delete an agent
 await client.deleteAgent(agent.id);
 
@@ -236,6 +242,10 @@ Lists all agents for the authenticated account. Requires bearer auth (JWT or API
 #### `async listDomains(): Promise<Domain[]>`
 
 Lists all registered domains for the authenticated account. Requires bearer auth (JWT or API key).
+
+#### `async updateAgentDomain(agentId: string, domainId?: string): Promise<UpdateAgentResponse>`
+
+Updates which identity is shown when an agent is verified. Pass a verified `domainId` to show that domain, or pass `""` (empty string) to show the account email. Requires bearer auth (JWT or API key).
 
 #### `async deleteAgent(agentId: string): Promise<boolean>`
 
